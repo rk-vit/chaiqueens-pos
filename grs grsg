@@ -1,0 +1,35 @@
+[33mcommit 6a8b46805d6c23560b5c781748288aa49302a16c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelopment[m[33m)[m
+Author: unknown <revanthkannam05@gmail.com>
+Date:   Tue Jul 1 16:20:04 2025 +0530
+
+    development
+
+[33mcommit 30e97495139f6dd9d986be57d50fa0c549f1035c[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Revanth Kanna M <revanthkannam05@gmail.com>
+Date:   Mon Jun 30 21:23:24 2025 +0530
+
+    Tamil addition & admin panel
+
+[33mcommit e5681b476e814cca96008a3e1e2bc5aa20ad7f07[m
+Author: Revanth Kanna M <revanthkannam05@gmail.com>
+Date:   Sun Jun 22 16:35:17 2025 +0530
+
+    update internal
+
+[33mcommit d2a0d6b26b6e27b606859557d827acff9971d88f[m
+Author: Revanth Kanna M <revanthkannam05@gmail.com>
+Date:   Sun Jun 22 16:32:32 2025 +0530
+
+    internal update
+
+[33mcommit dc16444fedeabbc88e4acd0c4c2806d899702586[m
+Author: Revanth Kanna M <revanthkannam05@gmail.com>
+Date:   Sun Jun 22 16:27:56 2025 +0530
+
+    Enabling admin access for client view
+
+[33mcommit 932ccf14d1fda40feeba6253f769ffff57f0a910[m
+Author: Revanth Kanna M <revanthkannam05@gmail.com>
+Date:   Sun Jun 22 16:22:53 2025 +0530
+
+    First commit
