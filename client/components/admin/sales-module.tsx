@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -69,10 +69,11 @@ export function SalesModule() {
   const [showDayBillsModal, setShowDayBillsModal] = useState(false)
   const [salesData, setSalesData] = useState<SalesData[]>([]);
   const [dailyBills , setDailyBills] = useState<DailyBills>({});
-  const todayStats = salesData[0];
-  useState(()=>{
+  const todaysDate = new Date().toISOString().split("T")[0];
+  const todayStats = salesData.find(day=>day.date===todaysDate);
+  useEffect(()=>{
     getStats(setSalesData,setDailyBills);
-  })
+  },[])
   const avgOrderValue = todayStats && todayStats.orders > 0 
   ? todayStats.revenue / todayStats.orders 
   : 0;
