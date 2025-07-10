@@ -66,19 +66,24 @@ const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.role = token.role;
-      }
-      return session;
-    },
+  async jwt({ token, user }) {
+    if (user) {
+      token.role = user.role;
+      token.email = user.email;
+      token.id = Number(user.id);
+    }
+    return token;
   },
+  async session({ session, token }) {
+    if (session.user) {
+      session.user.role = token.role;
+      session.user.email = token.email;
+      session.user.id = token.id;
+    }
+    return session;
+  },
+},
+
 };
 
 const handler = NextAuth(authOptions);

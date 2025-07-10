@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "nodemailer": "^7.0.5",
     "react-i18next": "^15.5.3"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17"
   }
 }

@@ -8,18 +8,23 @@ import { LogOut } from "lucide-react"
 import { InventoryModule } from "@/components/admin/inventory-module"
 import { MenuManagementModule } from "@/components/admin/menu-management-module"
 import { SalesModule } from "@/components/admin/sales-module"
-import { signOut } from "next-auth/react"
+import { signOut,useSession } from "next-auth/react"
 
 export default function AdminDashboard() {
   const [username, setUsername] = useState("")
   const router = useRouter()
-
+  const { data: session, status } = useSession()
+  
   useEffect(() => {
-    const role = localStorage.getItem("userRole")
-    const user = localStorage.getItem("username")
+  console.log("session:", session);
+  if (session?.user?.email) {
+    setUsername(session.user.email);
+  } else {
+    const user = localStorage.getItem("username");
+    setUsername(user || "");
+  }
+}, [session, status]);
 
-    setUsername(user || "")
-  }, [router])
 
  const logout = () => {
   localStorage.removeItem("userRole")
@@ -52,10 +57,12 @@ export default function AdminDashboard() {
           <TabsContent value="menu">
             <MenuManagementModule />
           </TabsContent>
-
-          <TabsContent value="sales">
-            <SalesModule />
-          </TabsContent>
+        
+        <TabsContent value="sales">
+            {session?.user.id===3?
+                <SalesModule />
+            :<h1>Access Restricted</h1>}
+        </TabsContent>
         </Tabs>
       </div>
     </div>
