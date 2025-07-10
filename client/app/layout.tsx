@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import ClientSessionProvider from './clientSessionProvider'
 
 export const metadata: Metadata = {
   title: 'Axion-POS',
@@ -12,8 +13,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
+
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ClientSessionProvider>{children}</ClientSessionProvider>
+      </body>
     </html>
   )
 }

@@ -7,17 +7,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, UserCheck } from "lucide-react"
+import { signIn } from "next-auth/react"
 
 export default function CashierLogin() {
-  const [username, setUsername] = useState("demouser@chaiqueens.com")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
 
-  const handleLogin = () => {
-      localStorage.setItem("userRole", "cashier")
-      localStorage.setItem("username", username)
-      router.push("/cashier")
-  }
+  const handleLogin = async() => {
+        const role = "cashier"
+        const callBackUrl = "/cashier"
+         const res = await signIn("credentials",{
+          email,
+          password,
+          role,
+          redirect:true,
+        callbackUrl:callBackUrl
+        })
+        localStorage.setItem("userRole", role)
+        localStorage.setItem("username", email)
+    }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -37,10 +46,9 @@ export default function CashierLogin() {
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter username"
               className="h-12"
-              defaultValue={"demouser@chaiqueens.com"}
             />
           </div>
 
@@ -52,7 +60,6 @@ export default function CashierLogin() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               className="h-12"
-              defaultValue={"demo@2025"}
             />
           </div>
 

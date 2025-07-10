@@ -8,6 +8,7 @@ import { LogOut } from "lucide-react"
 import { InventoryModule } from "@/components/admin/inventory-module"
 import { MenuManagementModule } from "@/components/admin/menu-management-module"
 import { SalesModule } from "@/components/admin/sales-module"
+import { signOut } from "next-auth/react"
 
 export default function AdminDashboard() {
   const [username, setUsername] = useState("")
@@ -17,19 +18,14 @@ export default function AdminDashboard() {
     const role = localStorage.getItem("userRole")
     const user = localStorage.getItem("username")
 
-    if (role !== "admin") {
-      router.push("/")
-      return
-    }
-
     setUsername(user || "")
   }, [router])
 
-  const logout = () => {
-    localStorage.removeItem("userRole")
-    localStorage.removeItem("username")
-    router.push("/")
-  }
+ const logout = () => {
+  localStorage.removeItem("userRole")
+  localStorage.removeItem("username")
+  signOut({ callbackUrl: "/" })
+}
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -7,24 +7,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, Settings } from "lucide-react"
-import { signIn } from "next-auth/react"
 
-export default function AdminLogin() {
-  const [email, setEmail] = useState("")
+export default function AdminRegister() {
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
-  const handleLogin = async() => {
-      const role = "admin"
-      const callBackUrl = "/admin"
-       const res = await signIn("credentials",{
-        email,
-        password,
-        role,
-        redirect:true,
-      callbackUrl:callBackUrl
-      })
-      localStorage.setItem("userRole", role)
-      localStorage.setItem("username", email)
+
+  const handleRegister = async() => {
+    
+      const result = await fetch('/api/auth/admin-register',{
+      method:"POST",
+      headers:{
+        'Content-Type':'application/json',
+        'Accept':'application/json'
+      },
+      body:JSON.stringify({username:username,password:password})
+    }
+  )
   }
 
   return (
@@ -37,16 +36,16 @@ export default function AdminLogin() {
           <div className="mx-auto mb-4 w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
             <Settings className="w-8 h-8 text-purple-600" />
           </div>
-          <CardTitle className="text-xl">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access admin panel</CardDescription>
+          <CardTitle className="text-xl">Admin Register</CardTitle>
+          <CardDescription>Please Create your credentials to access admin panel</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter email"
+              id="username"
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
               className="h-12"
             />
           </div>
@@ -62,8 +61,8 @@ export default function AdminLogin() {
             />
           </div>
 
-          <Button onClick={handleLogin} className="w-full h-12 text-lg">
-            Login to Admin Panel
+          <Button onClick={handleRegister} className="w-full h-12 text-lg">
+            Register
           </Button>
         </CardContent>
       </Card>

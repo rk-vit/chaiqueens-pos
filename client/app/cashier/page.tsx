@@ -10,6 +10,7 @@ import { CartModule } from "@/components/cashier/cart-module"
 import { BillsModule } from "@/components/cashier/bills-module"
 import { BillDetailModal } from "@/components/shared/bill-detail-modal"
 import { OrderSuccessModal } from "@/components/order-success-modal"
+import { signOut } from "next-auth/react"
 
 interface BillItem {
   id: number;
@@ -20,7 +21,14 @@ interface BillItem {
   name_tamil:string;
   quantity: number;
 }
-
+interface MenuItem {
+  id: number
+  name: string
+  price: number
+  category: string
+  category_tamil:string
+  name_tamil:string
+}
 interface BillData {
   items: BillItem[];
   total: number;
@@ -74,7 +82,7 @@ export default function CashierDashboard() {
         [...prev,itemId]
       )
   }
-  const addToCart = (item:BillItem) => {
+  const addToCart = (item:MenuItem) => {
     const existingItem = cart.find((cartItem) => cartItem.id === item.id)
     if (existingItem) {
       setCart(
@@ -180,10 +188,10 @@ export default function CashierDashboard() {
     setSelectedBill(null)
   }
 
-  const logout = () => {
+   const logout = () => {
     localStorage.removeItem("userRole")
     localStorage.removeItem("username")
-    router.push("/")
+    signOut({ callbackUrl: "/" })
   }
 
   return (
