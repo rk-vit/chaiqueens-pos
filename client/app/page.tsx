@@ -24,7 +24,7 @@ export default function HomePage() {
             Cashier Login
           </Button>
     
-          <Button onClick={() => router.push("/admin/login")} className="w-full h-14 text-lg" variant="outline" disabled>
+          <Button onClick={() => router.push("/admin/login")} className="w-full h-14 text-lg" variant="outline" >
             <Settings className="w-5 h-5 mr-3" />
             Admin Login
           </Button>
