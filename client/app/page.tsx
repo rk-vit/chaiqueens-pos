@@ -23,12 +23,11 @@ export default function HomePage() {
             <UserCheck className="w-5 h-5 mr-3" />
             Cashier Login
           </Button>
-    {/*
+    
           <Button onClick={() => router.push("/admin/login")} className="w-full h-14 text-lg" variant="outline" disabled>
             <Settings className="w-5 h-5 mr-3" />
             Admin Login
           </Button>
-      */}
         </CardContent>
       </Card>
     </div>
