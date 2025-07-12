@@ -48,10 +48,10 @@ const authOptions: NextAuthOptions = {
           console.log("Invalid password");
           return null;
         }
-
+        
         return {
           id: account.id,
-          email: account.email,
+          email: account.username,
           role: account.role,
         };
       },

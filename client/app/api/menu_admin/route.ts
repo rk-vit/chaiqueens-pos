@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/app/lib/db";
+import { sendEmail } from "../alert-mails/route";
 
 export async function GET(req: NextRequest) {
   const result = await db.query(`
@@ -28,8 +29,8 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { id, name, price, category, rawMaterials } = body;
+    const {editingItem,user} = await req.json();
+    const { id, name, price, category, rawMaterials } = editingItem;
 
     await db.query('BEGIN');
 
@@ -48,7 +49,12 @@ export async function PUT(req: NextRequest) {
     }
 
     await db.query('COMMIT');
-
+    const content = `An menu item has been UPDATED:
+            - Name: ${name}
+            - Price: ${price}
+            - Category: ${category}
+            `;
+    sendEmail(user,content);
     return NextResponse.json({ success: true, message: 'Menu item updated' });
 
   } catch (err) {
@@ -61,7 +67,9 @@ export async function PUT(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, price, category, rawMaterials } = await req.json();
+    const {newItem,user} = await req.json();
+    console.log(newItem)
+    const { name, price, category, rawMaterials } = await newItem;
     console.log("REQUEST TO POST")
     await db.query('BEGIN');
 
@@ -80,7 +88,12 @@ export async function POST(req: NextRequest) {
         [newItemId, material.materialId, material.amount]
       );
     }
-
+    const content = `An menu item has been ADDED:
+            - Name: ${name}
+            - Price: ${price}
+            - Category: ${category}
+            `;
+    sendEmail(user,content);
     await db.query('COMMIT');
     console.log("Successfull posted")
     return NextResponse.json({ success: true, message: 'Menu item created', id: newItemId });
@@ -95,7 +108,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { id } = await req.json();    // get the id to delete
+    const { item ,user} = await req.json();    // get the id to delete
+    const { id, name, price, category, rawMaterials } = item;
 
     await db.query('BEGIN');
 
@@ -106,7 +120,12 @@ export async function DELETE(req: NextRequest) {
     await db.query('DELETE FROM menu WHERE id = $1', [id]);
 
     await db.query('COMMIT');
-
+    const content = `An menu item has been DELETED:
+            - Name: ${name}
+            - Price: ${price}
+            - Category: ${category}
+            `;
+    sendEmail(user,content);
     return NextResponse.json({ success: true, message: 'Menu item deleted' });
   } catch (err) {
     console.error(err);

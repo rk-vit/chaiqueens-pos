@@ -9,8 +9,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Edit, Trash2 } from "lucide-react"
-
-
+import { useSession } from "next-auth/react"
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from "@/components/ui/alert-dialog"
 type MenuItem = {
   id: number;
   name: string;
@@ -42,7 +52,7 @@ async function getMenu(setMenuItems: (menu: MenuItem[]) => void) {
   }));
   setMenuItems(transformedMenu);
 }
-async function updateMenu(editingItem: MenuItem) {
+async function updateMenu(editingItem: MenuItem,user:string) {
   console.log("Update requested");
   const res = await fetch("/api/menu_admin", {
     method: "PUT",                            // use correct HTTP method
@@ -50,7 +60,7 @@ async function updateMenu(editingItem: MenuItem) {
       "Content-Type": "application/json",     // tell server you're sending JSON
       "Accept": "application/json",
     },
-    body: JSON.stringify(editingItem),        // send the actual item
+    body: JSON.stringify({editingItem:editingItem,user:user}),        // send the actual item
   });
 
   const data = await res.json();
@@ -58,7 +68,7 @@ async function updateMenu(editingItem: MenuItem) {
   return data;
 }
 
-async function addMenuItem (newItem:NewMenuItem ){
+async function addMenuItem (newItem:NewMenuItem,user:string){
     if (!newItem?.name || !newItem.price || !newItem.category) return
     const res = await fetch("/api/menu_admin", {
     method: "POST",                            // use correct HTTP method
@@ -66,19 +76,19 @@ async function addMenuItem (newItem:NewMenuItem ){
       "Content-Type": "application/json",     // tell server you're sending JSON
       "Accept": "application/json",
     },
-    body: JSON.stringify(newItem),        // send the actual item
+    body: JSON.stringify({newItem:newItem,user:user}),        // send the actual item
   });
     
     
   }
-async function deleteMenuItem(item:MenuItem){
+async function deleteMenuItem(item:MenuItem,user:string){
   const res = await fetch("/api/menu_admin",{
     method:"DELETE",
     headers:{
       "Content-Type":"application/json",
       "Accept":"application/json"
     },
-    body:JSON.stringify({id:item.id})
+    body:JSON.stringify({item:item,user})
   }
 
   )
@@ -95,13 +105,15 @@ async function getInventory(setInventoryItems:((Inv_items:InventoryItem[])=>void
   setInventoryItems(data.raw_materials);
 }
 export function MenuManagementModule() {
+    const { data: session, status } = useSession()
+
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [inventoryItems,setInventoryItems] = useState<InventoryItem[]>([])
   const [isAddItemOpen, setIsAddItemOpen] = useState(false)
   const [isEditItemOpen, setIsEditItemOpen] = useState(false)
   const [editingItem,setEditingItem] = useState<MenuItem|null>(null)
   const [addingNewCategory, setAddingNewCategory] = useState(false);
-
+  
   const [newItem, setNewItem] = useState<NewMenuItem|null>(null)
   useEffect(()=>{
     getMenu(setMenuItems);
@@ -195,7 +207,7 @@ const updateRawMaterial_1 = (index: number, field: string, value: string) => {
                   
                 </div>
                 <div>
-                  <Label>Price ($)</Label>
+                  <Label>Price (₹)</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -287,9 +299,14 @@ const updateRawMaterial_1 = (index: number, field: string, value: string) => {
                 </Button>
                 <Button 
                   onClick={async () => {
+                    
                     if (newItem) {
                       try {
-                        await addMenuItem(newItem);
+                        if (!session?.user?.email) {
+                          console.log("No auth");
+                          return;
+                        }
+                        await addMenuItem(newItem,session?.user.email);
                         await getMenu(setMenuItems);
                       } catch (err) {
                         console.error("Failed to add item", err);
@@ -393,7 +410,15 @@ const updateRawMaterial_1 = (index: number, field: string, value: string) => {
                 <Button variant="outline" onClick={() => {setIsEditItemOpen(false)}}>
                   Cancel
                 </Button>
-                <Button onClick={()=>{editingItem && updateMenu(editingItem); setIsEditItemOpen(false)}}>Confirm</Button>
+                <Button onClick={()=>{
+                  if(!session?.user?.email){
+                    return console.log("No auth")
+                  }
+                  editingItem && updateMenu(editingItem,session?.user.email); 
+                  setIsEditItemOpen(false)
+                  }}>
+                    Confirm
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -458,9 +483,36 @@ const updateRawMaterial_1 = (index: number, field: string, value: string) => {
                     <Button variant="outline" size="sm" onClick={()=>{setIsEditItemOpen(true); console.log("editing item:- ",item.name);setEditingItem(item)}}>
                       <Edit className="w-3 h-3" />
                     </Button>
-                    <Button variant="outline" onClick={async()=>{await deleteMenuItem(item); getMenu(setMenuItems)}} size="sm">
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Item</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{item.name}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={async() => {
+                            if(!session?.user.email){
+                          return console.log("Hii");
+                        }
+                        await deleteMenuItem(item,session?.user.email);
+                        getMenu(setMenuItems)
+                          }}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                   </div>
                 </TableCell>
               </TableRow>

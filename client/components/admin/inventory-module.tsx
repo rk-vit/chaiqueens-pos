@@ -1,5 +1,4 @@
 "use client"
-
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,7 +19,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Plus, Edit, Trash2 } from "lucide-react"
-
+import { useSession } from "next-auth/react"
+import { Session } from "inspector/promises"
 type InventoryItem = {
   id: number;
   name: string;
@@ -46,7 +46,8 @@ async function getInventory(setInventoryItems:((Inv_items:InventoryItem[])=>void
   setInventoryItems(data.raw_materials);
 }
 
-const updateInventoryItem = async (updatedItem: InventoryItem|null) => {
+const updateInventoryItem = async (updatedItem: InventoryItem|null,user:string) => {
+
   if (!updatedItem) return;
 
   if (!updatedItem.name || !updatedItem.current_stock || !updatedItem.unit || !updatedItem.min_stock) return;
@@ -56,13 +57,15 @@ const updateInventoryItem = async (updatedItem: InventoryItem|null) => {
     await fetch(`/api/inventory`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedItem),
+      body: JSON.stringify({updatedItem:updatedItem,user:user}),
     });
   } catch (err) {
     console.error("Failed to update item:", err);
   }
 };
-const addInventoryItem = async (newItem: newItem|null) => {
+const addInventoryItem = async (newItem: newItem|null,user:string) => {
+  
+
   if (!newItem) return;
 
   if (!newItem.name || !newItem.current_stock || !newItem.unit || !newItem.min_stock) return;
@@ -72,20 +75,20 @@ const addInventoryItem = async (newItem: newItem|null) => {
     await fetch(`/api/inventory`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newItem),
+      body: JSON.stringify({newItem:newItem,user:user}),
     });
   } catch (err) {
     console.error("Failed to update item:", err);
   }
 };
- const deleteInventoryItem = async(id: number) => {
-    if (!id) return;
+ const deleteInventoryItem = async(item:InventoryItem|null ,user:string) => {
+    if (!item) return;
   try {
     // Call your API to update the item
     await fetch(`/api/inventory`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({id:id}),
+      body: JSON.stringify({item:item,user:user}),
     });
   } catch (err) {
     console.error("Failed to update item:", err);
@@ -93,6 +96,8 @@ const addInventoryItem = async (newItem: newItem|null) => {
 }
 
 export function InventoryModule() {
+  const { data: session, status } = useSession()
+
   const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [editingItemOpen,setEditingItemOpen] = useState(false);
@@ -181,9 +186,22 @@ export function InventoryModule() {
                 />
               </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={async()=>{await addInventoryItem(newItem) ; await getInventory(setInventory) ;setIsAddItemOpen(false); setNewItem( {name: "",current_stock: 0,unit: "",min_stock: 0})}} className="flex-1">
+                <Button
+                  onClick={async () => {
+                    if (!session?.user?.email) {
+                      console.error("No user email in session");
+                      return;
+                    }
+                    await addInventoryItem(newItem, session.user.email);
+                    await getInventory(setInventory);
+                    setIsAddItemOpen(false);
+                    setNewItem({ name: "", current_stock: 0, unit: "", min_stock: 0 });
+                  }}
+                  className="flex-1"
+                >
                   Add Item
                 </Button>
+
                 <Button variant="outline" onClick={() => setIsAddItemOpen(false)} className="flex-1">
                   Cancel
                 </Button>
@@ -255,7 +273,10 @@ export function InventoryModule() {
                           <Button 
                           onClick={
                             async()=>{
-                              await updateInventoryItem(editingItem);
+                              if(!session?.user?.email){
+                                return console.log("No Auth")
+                              }
+                              await updateInventoryItem(editingItem,session?.user.email);
                               await getInventory(setInventory);
                               setEditingItemOpen(false);
                               setEditingItem(null);
@@ -290,7 +311,13 @@ export function InventoryModule() {
                       <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                         <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={async() => {await deleteInventoryItem(item.id); await getInventory(setInventory)}}
+                          onClick={async() => {
+                            if(!session?.user?.email){
+                              return console.log("No auth");
+                            }
+                            await deleteInventoryItem(item,session?.user.email); 
+                            await getInventory(setInventory)
+                          }}
                           className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
                         >
                           Delete
@@ -371,7 +398,14 @@ export function InventoryModule() {
                               />
                             </div>
                             <div className="flex gap-2 pt-4">
-                              <Button onClick={async()=>{await updateInventoryItem(editingItem); await getInventory(setInventory);setEditingItemOpen(false); setEditingItem(null)}} className="flex-1">
+                              <Button onClick={async()=>{
+                                if(!session?.user?.email){
+                                  return console.log("No auth");
+                                }
+                                await updateInventoryItem(editingItem,session?.user.email); 
+                                await getInventory(setInventory);
+                                setEditingItemOpen(false); 
+                                setEditingItem(null)}} className="flex-1">
                                 Update
                               </Button>
                               <Button variant="outline" onClick={resetForm} className="flex-1">
@@ -400,7 +434,13 @@ export function InventoryModule() {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={async() => {await deleteInventoryItem(item.id); await getInventory(setInventory)}}
+                              onClick={async() => {
+                                if(!session?.user?.email){
+                                  return console.log("No auth")
+                                }
+                                await deleteInventoryItem(item,session?.user.email); 
+                                await getInventory(setInventory)
+                              }}
                               className="bg-red-600 hover:bg-red-700"
                             >
                               Delete

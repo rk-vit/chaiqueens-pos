@@ -1,6 +1,6 @@
 import { NextRequest,NextResponse } from "next/server";
 import db from "@/app/lib/db";
-
+import { sendEmail } from "../alert-mails/route";
 
 interface BillItem {
   id: number;

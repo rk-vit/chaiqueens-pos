@@ -13,28 +13,35 @@ const transporter = nodemailer.createTransport({
     },
   });
 
-export async function sendEmail(name:string,email:string,subject:string,message:string){
-    const content = `
-    *Modification Alert from Axion POS*
+export async function sendEmail(name:string,subject:string){
+        const htmlContent = `
+  <div style="font-family: Georgia, serif; font-size: 14px; color: #000; line-height: 1.6; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
+    <p style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 20px;">
+      Modification Alert from Axion POS
+    </p>
 
-    The following updates have been made in the system:
+    <p>The following updates have been made in the system:</p>
 
-    *Subject*: ${subject}
+    <p><strong>Action:</strong> ${subject}</p>
+    <p><strong>Updated By:</strong> ${name}</p>
 
-    *Updated By*: ${name}
+    <p><em>If this is not an authorized modification, please contact our POS Team.</em></p>
 
-    If this is not an authorized modification , please contact our POS Team.
+    <p style="margin-top: 30px;">
+      Thank you,<br/>
+      Axion POS Team
+    </p>
+  </div>
+`;
 
-    Thank you,
-    Axion POS Team
-    `;
+
 
     try {
         const info = await transporter.sendMail({
             from: "axiondevsoft@gmail.com", // Sender address
-            to: "revanthkannam05@gmail.com", // Receivers
+            to: "axiondevsoft@gmail.com, supriyaravi2007@gmail.com", // Receivers
             subject: "POS System Modification Alert", // Subject line
-            text: content, // Plain text body
+            html: htmlContent, // Plain text body
         });
 
         console.log("Message sent: %s", info.messageId);
@@ -43,17 +50,5 @@ export async function sendEmail(name:string,email:string,subject:string,message:
         console.error("Error sending email:", error);
         return false
     }
-
 }
 
-export async function POST(req:NextRequest) {
-    const {name,email,subject,message} = await req.json();
-    console.log(name,email,subject,message);
-   const status = await sendEmail(name,email,subject,message);
-   if(status){
-    return NextResponse.json({text:"Success"},{status:200})
-   }else{
-    return NextResponse.json({text:"Failure"},{status:500})
-
-   }
-}
