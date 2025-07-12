@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest) {
             - Price: ${price}
             - Category: ${category}
             `;
-    sendEmail(user,content);
+    await sendEmail(user,content);
     return NextResponse.json({ success: true, message: 'Menu item updated' });
 
   } catch (err) {
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
             - Price: ${price}
             - Category: ${category}
             `;
-    sendEmail(user,content);
+    await sendEmail(user,content);
     await db.query('COMMIT');
     console.log("Successfull posted")
     return NextResponse.json({ success: true, message: 'Menu item created', id: newItemId });
@@ -125,7 +125,7 @@ export async function DELETE(req: NextRequest) {
             - Price: ${price}
             - Category: ${category}
             `;
-    sendEmail(user,content);
+    await sendEmail(user,content);
     return NextResponse.json({ success: true, message: 'Menu item deleted' });
   } catch (err) {
     console.error(err);

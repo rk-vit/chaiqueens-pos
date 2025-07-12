@@ -24,7 +24,7 @@ export async function PUT(req:NextRequest){
         - Name: ${name}
         - Current Stock: ${current_stock} ${unit}
         - Minimum Stock Level: ${min_stock}`;
-        sendEmail(user,content);
+        await sendEmail(user,content);
         return NextResponse.json({ success: true, message: 'Updated Successfully' });
         
     }catch(err){
@@ -43,7 +43,7 @@ export async function POST(req:NextRequest){
         - Name: ${name}
         - Current Stock: ${current_stock} ${unit}
         - Minimum Stock Level: ${min_stock}`;
-        sendEmail(user,content);
+        await sendEmail(user,content);
         return NextResponse.json({success:true,message:"Inserted new item successfully"});
     }catch(err){
         console.log(err);
@@ -64,7 +64,7 @@ export async function DELETE(req:NextRequest){
         - Name: ${name}
         - Current Stock: ${current_stock} ${unit}
         - Minimum Stock Level: ${min_stock}`;
-        sendEmail(user,content);
+        await sendEmail(user,content);
         return NextResponse.json({success:true,message:"Deleted "})
     }catch(err){
         await db.query('ROLLBACK')
